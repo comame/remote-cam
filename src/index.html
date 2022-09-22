@@ -7,11 +7,12 @@
     <title>remotecam</title>
 </head>
 <body>
-    <div>
-        <button id="camera">CAMERA</button>
-        <button id="offer">OFFER</button>
-        <button id="adjust">ADJUST</button>
-        <select id="select"></select>
+    <div id="controls">
+        <div>
+            <select id="select"></select>
+            <button id="camera">CAMERA</button>
+            <button id="offer">OFFER</button>
+        </div>
     </div>
     <video id="video" controls></video>
     <script src="./script.js"></script>
@@ -19,8 +20,16 @@
         video {
             max-height: 100%;
             max-width: 100%;
-            display: inline;
-            background: gray;
+            display: inline-block;
+        }
+
+        body.fullscreen {
+            margin: 0;
+        }
+        body.fullscreen > video {
+            min-width: 100%;
+            min-height: 100%;
+            display: inline-block;
         }
     </style>
 </body>
