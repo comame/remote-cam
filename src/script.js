@@ -6,7 +6,7 @@ const videoElement = document.getElementById('video') /** @type { HTMLVideoEleme
 const selectElement = document.getElementById('select')
 
 const defaultResolutions = [
-    [ 'USB3.0 Capture Video ', 1920, 1080 ]
+    [ 'USB3.0 Capture Video', 1920, 1080 ]
 ]
 
 let sendVideo = false
@@ -22,23 +22,32 @@ let peer = null
 /** @type { MediaStream } */
 let mediaStream = null
 
+let cameraAccess = true
+
 navigator.permissions.query({ name: 'camera' }).then(status => {
     switch (status.state) {
         case 'denied': {
-            alert('Camera permission required')
+            cameraAccess = false
+            showError('カメラへのアクセスを許可してください')
             break
         }
+        case 'prompt': {
+            cameraAccess = false
+            showError('CAMERA ボタンを押して、カメラへのアクセスを許可してください')
+        }
     }
- })
-
-navigator.mediaDevices.enumerateDevices().then((devices) => {
+ }).finally(navigator.mediaDevices.enumerateDevices().then((devices) => {
     devices.filter(it => it.kind === 'videoinput').forEach(videoDevice => {
         const item = document.createElement('option')
         item.value = videoDevice.deviceId
-        item.text = videoDevice.label
+        item.textContent = videoDevice.label
         selectElement.add(item)
+
+        if (cameraAccess && videoDevice.label === '') {
+            showError('デバイス名を表示するには、カメラへの永続アクセスを許可してください')
+        }
     })
-})
+}))
 
 signaling.addEventListener('message', async (e) => {
     let data
@@ -153,4 +162,15 @@ async function handleCandidate(candidate) {
     } else {
         await peer.addIceCandidate(candidate)
     }
+}
+
+function showError(msg) {
+    console.error(msg)
+    const element = document.createElement('div')
+    element.classList.add('error')
+    element.textContent = msg
+    document.body.appendChild(element)
+    setTimeout(() => {
+        document.body.removeChild(element)
+    }, 3000)
 }
